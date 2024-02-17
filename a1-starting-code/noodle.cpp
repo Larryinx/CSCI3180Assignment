@@ -14,9 +14,9 @@
 * and regulations, as contained in the website
 * http://www.cuhk.edu.hk/policy/academichonesty/
 *
-* Name: <FILL YOUR NAME HERE>
-* Student ID: <FILL YOUR STUDENT ID HERE>
-* Email Address: <FILL YOUR EMAIL ADDRESS HERE>
+* Name: LI Yinxi
+* Student ID: 1155160255
+* Email Address: 1155160255@link.cuhk.edu.hk
 *
 * Source material acknowledgements (if any):
 * 
@@ -44,6 +44,10 @@ void Noodle::update()
     //TODO: implement this function
     //Hint: you can call the base class implementation of a function by BaseClassName::FunctionName()
     
+    Ingredient::update();
+    if (softness > 0) {
+        softness -= 5;
+    }
 
 }
 

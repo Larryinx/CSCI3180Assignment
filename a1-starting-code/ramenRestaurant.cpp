@@ -20,6 +20,13 @@ RamenRestaurant::~RamenRestaurant()
     //TODO: implement this function
     //Hint: use "delete" for non-array dynamic objects, and use "delete []" for dynamic arrays
 
+    for (int i = 0; i < ingredientStorageCapacity; i++) {
+        if (ingredientStorage[i] != nullptr) {
+            delete ingredientStorage[i];
+        }
+    }
+
+    delete [] ingredientStorage;
 
 }
 
@@ -96,6 +103,64 @@ bool RamenRestaurant::prepareAndServeRamen(int requiredNoodleSoftness, int requi
         Please copy and use the following for the failure message:
         cout << "Oh no, we cannot prepare the ramen requested! :(" << endl;
     */
+    int noodleIndex = -1;
+    int soupIndex = -1;
+    int porkIndex = -1;
+    int secondPorkIndex = -1;
+
+    for (int i = 0; i < ingredientStorageCapacity; i++) {
+        if (ingredientStorage[i] != nullptr) {
+            if (noodleIndex == -1) {
+                Noodle* noodle = dynamic_cast<Noodle*>(ingredientStorage[i]);
+                if (noodle != nullptr && noodle->getSoftness() >= requiredNoodleSoftness && noodle->isGood()) {
+                    noodleIndex = i;
+                }
+            }
+
+            if (soupIndex == -1) {
+                Soup* soup = dynamic_cast<Soup*>(ingredientStorage[i]);
+                if (soup != nullptr && soup->getSpiciness() >= requiredSoupSpiciness && soup->isGood()) {
+                    soupIndex = i;
+                }
+            }
+
+            if (porkIndex == -1) {
+                Pork* pork = dynamic_cast<Pork*>(ingredientStorage[i]);
+                if (pork != nullptr && pork->isGood()) {
+                    porkIndex = i;
+                }
+            } else if (doublePork && secondPorkIndex == -1) {
+                Pork* pork = dynamic_cast<Pork*>(ingredientStorage[i]);
+                if (pork != nullptr && pork->isGood()) {
+                    secondPorkIndex = i;
+                }
+            }
+        }
+    }
+
+    if (noodleIndex == -1 || soupIndex == -1 || porkIndex == -1 || (doublePork && secondPorkIndex == -1)) {
+        cout << "Oh no, we cannot prepare the ramen requested! :(" << endl;
+        return false;
+    }
+
+    delete ingredientStorage[noodleIndex];
+    delete ingredientStorage[soupIndex];
+    delete ingredientStorage[porkIndex];
+    ingredientStorage[noodleIndex] = nullptr;
+    ingredientStorage[soupIndex] = nullptr;
+    ingredientStorage[porkIndex] = nullptr;
+    ingredientStorageUsed -= 3;
+    if (doublePork) {
+        delete ingredientStorage[secondPorkIndex];
+        ingredientStorage[secondPorkIndex] = nullptr;
+        ingredientStorageUsed--;
+    }
+
+    ramenServed++;
+
+    cout << "Ramen has been skillfully prepared and happily served! :)" << endl;
+
+    return true;
 
 }
 
