@@ -73,7 +73,29 @@ class Plane:
         self._direction = init_direction
 
     # TODO: add Property Decorator for attributes self._life, self._symbol, self._direction here, including setter.
+    @ property
+    def life(self):
+        return self._life
     
+    @ life.setter
+    def life(self, new_life):
+        self._life = new_life
+    
+    @ property
+    def symbol(self):
+        return self._symbol
+    
+    @ symbol.setter
+    def symbol(self, new_symbol):
+        self._symbol = new_symbol
+    
+    @ property
+    def direction(self):
+        return self._direction
+    
+    @ direction.setter
+    def direction(self, new_direction):
+        self._direction = new_direction
     
     def draw(self):
         for i in range(self._size[0]):
@@ -82,10 +104,14 @@ class Plane:
 
     def move(self):
         # TODO: Implement the logic of the next position the plane moves to here.
+        self._location = [(self._location[0] + global_directions[self._direction][0] * self._speed) % GAME_MAP_ROWS, (self._location[1] + global_directions[self._direction][1] * self._speed) % GAME_MAP_COLS]
         
 
     def is_collision(self, bullet_location):
         # TODO: Implement the logic to determine whether the plane has been hit by a bullet here.
+        check_x = bullet_location[0] >= self._location[0] and bullet_location[0] < (self._location[0] + self._size[0])
+        check_y = bullet_location[1] >= self._location[1] and bullet_location[1] < (self._location[1] + self._size[1])
+        return check_x and check_y
         
 
     def shoot(self, bullet_location, bullet_direction, bullet_type):
@@ -108,7 +134,13 @@ class Bullet:
         self._direction = init_direction
 
     # TODO: add Property Decorator for attributes self._validity here, including setter.
+    @ property
+    def validity(self):
+        return self._validity
     
+    @ validity.setter
+    def validity(self, new_validity):
+        self._validity = new_validity
     
     def draw(self):
         if not self._validity:
@@ -121,15 +153,27 @@ class Bullet:
             return
 
         # TODO: Implement the logic of the next position the bullet moves to here.
-        
+        self._location = [(self._location[0] + global_directions[self._direction][0] * self._speed) % GAME_MAP_ROWS, (self._location[1] + global_directions[self._direction][1] * self._speed) % GAME_MAP_COLS]
         
         # TODO: Implement the logic to determine whether the bullet hits the plane.
-        
+        if self._bullet_type == BulletType.BUL_FROM_ENEMY:
+            if global_player.is_collision(self._location):
+                global_player.hit()
+                self.validity = False
+        else:
+            if global_enemy.is_collision(self._location):
+                global_enemy.hit()
+                self.validity = False
         
         self.check_on_edge()
     
     def check_on_edge(self):
         # TODO: Implement the logic to determine whether the bullet reaches the map boundary.
+        if (self._location[0] <= self._speed) and self._bullet_type == BulletType.BUL_FROM_PLAYER:
+            self._bullet_on_edge = True
+        
+        if (self._location[0] + self._speed >= GAME_MAP_ROWS) and self._bullet_type == BulletType.BUL_FROM_ENEMY:
+            self._bullet_on_edge = True
         
 
 class Player(Plane):
@@ -140,6 +184,10 @@ class Player(Plane):
     def move(self):
         super().move()
         # TODO: Implement the logic of the player automatically firing a bullet after PLAYER_SHOOT_INTERVAL frames.
+        self._shoot_interval += 1
+        if self._shoot_interval >= PLAYER_SHOOT_INTERVAL:
+            self.shoot()
+            self._shoot_interval = 0
         
 
     def shoot(self):
@@ -162,9 +210,17 @@ class Enemy(Plane):
     def move(self):
         super().move()
         # TODO: Implement the logic that enemy has a 10% chance of changing direction in each frame.
-        
+        if random.randint(0, 99) < 10:
+            if self._direction == DirectionType.DIR_LEFT:
+                self._direction = DirectionType.DIR_RIGHT
+            else:
+                self._direction = DirectionType.DIR_LEFT
         
         # TODO: Implement the logic of the enemy automatically firing a bullet after ENEMY_SHOOT_INTERVAL frames.
+        self._shoot_interval += 1
+        if self._shoot_interval >= ENEMY_SHOOT_INTERVAL:
+            self.shoot()
+            self._shoot_interval = 0
         
 
     def shoot(self):
@@ -221,9 +277,9 @@ class Environment:
         
         # TODO: Implement the logic to determine whether the game should end.
         if global_enemy.life <= 0:
-            self._winner = 
+            self._winner = global_player
         if global_player.life <= 0:
-            self._winner = 
+            self._winner = global_enemy
 
     def display_all(self):
         print()
@@ -244,9 +300,9 @@ class Environment:
         
         # TODO: Implement speaking logic here.
         if random.randint(0, 1) == 0:
-            self._speaker = 
+            self._speaker = global_player
         else:
-            self._speaker = 
+            self._speaker = global_enemy
         self._speaker.speak() 
         
         for _ in range(GAME_MAP_COLS + 2):
