@@ -129,17 +129,21 @@ val result_1_2 = check_bull ([3, 7, 4, 6, 5]);
 fun get_point_bull cards =
     case cards of
         [a, b, c, d, e] =>
-            if (a + b + c) mod 10 = 0 then (d + e) mod 10
-            else if (a + b + d) mod 10 = 0 then (c + e) mod 10
-            else if (a + b + e) mod 10 = 0 then (c + d) mod 10
-            else if (a + c + d) mod 10 = 0 then (b + e) mod 10
-            else if (a + c + e) mod 10 = 0 then (b + d) mod 10
-            else if (a + d + e) mod 10 = 0 then (b + c) mod 10
-            else if (b + c + d) mod 10 = 0 then (a + e) mod 10
-            else if (b + c + e) mod 10 = 0 then (a + d) mod 10
-            else if (b + d + e) mod 10 = 0 then (a + c) mod 10
-            else if (c + d + e) mod 10 = 0 then (a + b) mod 10
-            else 0
+            let
+                fun adjust_points sum = if sum mod 10 = 0 then 10 else sum mod 10
+            in
+                if (a + b + c) mod 10 = 0 then adjust_points (d + e)
+                else if (a + b + d) mod 10 = 0 then adjust_points (c + e)
+                else if (a + b + e) mod 10 = 0 then adjust_points (c + d)
+                else if (a + c + d) mod 10 = 0 then adjust_points (b + e)
+                else if (a + c + e) mod 10 = 0 then adjust_points (b + d)
+                else if (a + d + e) mod 10 = 0 then adjust_points (b + c)
+                else if (b + c + d) mod 10 = 0 then adjust_points (a + e)
+                else if (b + c + e) mod 10 = 0 then adjust_points (a + d)
+                else if (b + d + e) mod 10 = 0 then adjust_points (a + c)
+                else if (c + d + e) mod 10 = 0 then adjust_points (a + b)
+                else 0
+            end
       | _ => raise Fail "Invalid input: List must contain exactly five elements."
 ;
 
